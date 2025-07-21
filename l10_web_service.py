@@ -1,7 +1,7 @@
 from flask import Flask, request, send_file, jsonify
 import tempfile
 import os
-from l10_processor import populate_l10_template
+from l10_processor import populate_l10_from_text
 import json
 from datetime import datetime
 
@@ -31,7 +31,7 @@ def populate_l10_endpoint():
         temp_output.close()
         
         # Populate the template
-        populate_l10_template(temp_json.name, template_path, output_path)
+        populate_l10_from_text(temp_json.name, template_path, output_path)
         
         # Return the file
         response = send_file(
