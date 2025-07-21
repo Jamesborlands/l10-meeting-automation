@@ -1,0 +1,114 @@
+
+    {
+      "HEADLINES": [
+        {
+          "headline": "Confirmation on Training Sought for Discount Points",
+          "presenter": "Lyndsey Dunnavant",
+          "impact": "A collective desire was expressed for proper training on managing discount points, which could potentially improve team efficiency."
+        },
+        {
+          "headline": "New QC Vendor Agreement",
+          "presenter": "Josh Weinberg",
+          "impact": "Sean has signed off on the new QC vendor, QC Ally, which could enhance service capabilities."
+        },
+        {
+          "headline": "Cornerstone Team Name Policy Discussion",
+          "presenter": "Josh Weinberg",
+          "impact": "Discussion around guidelines for team names and email usage, indicating stricter governance moving forward."
+        }
+      ],
+      "TO-DO REVIEW": [
+        {
+          "WHO": "Alex",
+          "TO-DO": "Provide the list of the top 10 Maven fails.",
+          "DONE?": "WIP",
+          "NOTES": "Josh will help schedule training based on this list."
+        },
+        {
+          "WHO": "Lyndsey Dunnavant",
+          "TO-DO": "Coordinate the meeting for OB Encompass data mapping.",
+          "DONE?": "WIP",
+          "NOTES": "Josh is available to help identify fields and logic."
+        },
+        {
+          "WHO": "Josh Weinberg",
+          "TO-DO": "Follow up with QC Ally for the new vendor selection process.",
+          "DONE?": "WIP",
+          "NOTES": "Ensure they are aware of cost considerations."
+        },
+        {
+          "WHO": "Josh Weinberg",
+          "TO-DO": "Follow up on the team name guidelines document to Sean.",
+          "DONE?": "WIP",
+          "NOTES": "Ensure all requirements are communicated and enforced."
+        },
+        {
+          "WHO": "Josh Weinberg",
+          "TO-DO": "Send a nudge to Yosha about the QC plan.",
+          "DONE?": "WIP",
+          "NOTES": "No response has been received yet."
+        },
+        {
+          "WHO": "Josh Weinberg",
+          "TO-DO": "Finalize documentation for the marketing workflow.",
+          "DONE?": "WIP",
+          "NOTES": "Keep everything consistent with Sean's plans."
+        }
+      ],
+      "ISSUES LIST (IDS)": [
+        {
+          "issue_description": "Concern over team name and email usage compliance.",
+          "who_raised_it": "Josh Weinberg",
+          "root_cause": "Inconsistencies in current usage; lack of adherence to prior guidelines.",
+          "impact_urgency": "High; potential layoffs if guidelines are not followed.",
+          "related_discussions": "Discussion about the threshold volume for team name approvals.",
+          "notes": "Concern that people are not adhering to new policies, particularly regarding DBAs."
+        },
+        {
+          "issue_description": "Increased severity of BBB complaint against an employee.",
+          "who_raised_it": "Lyndsey Dunnavant",
+          "root_cause": "The employee was allegedly involved in a criminal investigation.",
+          "impact_urgency": "Critical; needs immediate resolution to prevent escalation.",
+          "related_discussions": "Discussion around potentially terminating the employee.",
+          "notes": "Escalate the severity to Sean as it isn't going away."
+        }
+      ],
+      "SOLVED ISSUES": [
+        {
+          "original_issue": "Alabama exam communication missing.",
+          "solution_decided": "The correct email was resent to the parties involved.",
+          "who_will_implement": "Lisa Schick",
+          "by_when": "Completed.",
+          "success_criteria": "Receive a firm response confirming the receipt and action on the email."
+        }
+      ],
+      "NEW TO-DOS": [
+        {
+          "WHO": "Lisa Schick",
+          "TO-DO": "Ensure that the Alabama exam process is tracked to completion.",
+          "DUE DATE": "Next week.",
+          "CONTEXT": "Missed the original email; needs to confirm compliance.",
+          "DEPENDENCIES": "Await responses from exam boards."
+        }
+      ],
+      "MEETING RATING": [
+        {
+          "name": "Lisa Schick",
+          "score": 10
+        },
+        {
+          "name": "Lyndsey Dunnavant",
+          "score": 10
+        },
+        {
+          "name": "Ashley Mofield",
+          "score": 10
+        },
+        {
+          "name": "Josh Weinberg",
+          "score": 10
+        }
+      ],
+      "average_rating": 10
+    }
+    

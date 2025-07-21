@@ -1,0 +1,92 @@
+**HEADLINES**
+- Proper training for the team is desired, and getting a quote for training would benefit everyone.
+- The resource center for Encompass has been helpful in resolving errors.
+- Automation and consistency in pricing data handling have been endorsed.
+- The new QC vendor is being pursued actively.
+
+---
+
+**TO-DO REVIEW**
+WHO: Alex  
+TO-DO: Provide the list of the top 10 maven fails.  
+DONE?: No  
+NOTES: Pending follow-up to share with the team.  
+---  
+WHO: Lyndsey Dunnavant  
+TO-DO: Coordinate a meeting for OB Encompass data mapping.  
+DONE?: No  
+NOTES: Task assigned to initiate necessary discussions on data mapping.  
+---  
+WHO: Josh Weinberg  
+TO-DO: Help schedule the training for the team once the list is received.  
+DONE?: No  
+NOTES: Waiting for the list from Alex to proceed.  
+---  
+WHO: Josh Weinberg  
+TO-DO: Follow up with Sean regarding the new QC vendor selection.  
+DONE?: No  
+NOTES: Moving the process forward in a week.  
+---  
+WHO: Lyndsey Dunnavant  
+TO-DO: Reprovide guidelines on team names and DBAs.  
+DONE?: No  
+NOTES: Task to clarify requirements for using team names without official DBAs.  
+---  
+WHO: Josh Weinberg  
+TO-DO: Remind Sean of the enforcement of the new team name guidelines once communicated.  
+DONE?: No  
+NOTES: Task to ensure compliance with the new guidelines.  
+---  
+WHO: Josh Weinberg  
+TO-DO: Shoot a nudge to Yosha regarding the QC plan.  
+DONE?: No  
+NOTES: Follow-up needed for clarity on the QC plans.  
+
+---
+
+**SCORECARD/METRICS REVIEW**
+No metrics discussed.
+
+**ROCK REVIEW**
+No quarterly goals discussed.
+
+**CUSTOMER/EMPLOYEE HEADLINES**
+- BBB complaint received, involving potential criminal investigation.
+
+---
+
+**ISSUES LIST (IDS)**
+ISSUE: Employee misuse of company email and potential criminal investigation regarding her actions.  
+RAISED BY: Lyndsey Dunnavant  
+DISCUSSION: Employee's actions are causing concern. The need to escalate this to Sean and consider potential termination was discussed.  
+---  
+ISSUE: Non-compliance with team name rules and need for DBA registration.  
+RAISED BY: Josh Weinberg  
+DISCUSSION: Need to clarify guidelines on team names that require DBA registrations to avoid further issues. Sean prefers not registering DBAs, but states are enforcing these requirements.  
+
+---
+
+**NEW TO-DOS**
+WHO: Ashley Mofield  
+TO-DO: Continue monitoring Encompass resource center for updates and improvements as necessary.  
+DUE: Ongoing  
+---  
+WHO: Josh Weinberg  
+TO-DO: Mark Alabama exam as complete after confirming with the team.  
+DUE: Not specified  
+---  
+WHO: Lyndsey Dunnavant  
+TO-DO: Keep marketing workflow on the agenda for tracking.  
+DUE: Ongoing  
+
+---
+
+**CASCADING MESSAGES**
+None discussed.
+
+**MEETING RATING**
+Josh Weinberg: 10  
+Lyndsey Dunnavant: 10  
+Ashley Mofield: 10  
+Lisa Schick: 10  
+Average: 10
