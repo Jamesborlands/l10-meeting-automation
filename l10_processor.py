@@ -6,7 +6,27 @@ import os
 from copy import copy
 import re
 
-# Keep the original functions for backward compatibility
+def parse_l10_json(input_data):
+    """Parse L10 meeting data - handles JSON input"""
+    
+    # If it's a string, parse it as JSON
+    if isinstance(input_data, str):
+        try:
+            # Clean up if wrapped in backticks
+            if '```' in input_data:
+                input_data = input_data.split('```')[1]
+                if input_data.startswith('json\n'):
+                    input_data = input_data[5:]
+            
+            # Parse JSON
+            return json.loads(input_data.strip())
+        except json.JSONDecodeError as e:
+            print(f"JSON parse error: {e}")
+            # Fall back to text parsing
+            return parse_l10_text(input_data)
+    
+    # If it's already a dict, return it
+    return input_data
 def parse_l10_text(text):
     """Parse the structured L10 text output into a dictionary format"""
     sections = {

@@ -1,0 +1,9 @@
+*.pyc
+__pycache__/
+*.xlsx
+*.json
+.env
+venv/
+archive/
+outputs/
+transcripts/
