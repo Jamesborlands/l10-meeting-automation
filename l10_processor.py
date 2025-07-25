@@ -31,12 +31,8 @@ def parse_l10_json(input_data):
 
 def convert_to_l10_format(data):
     """Convert various JSON formats to L10 format"""
-    print(f"=== DEBUG: Converting data format ===")
-    print(f"Input keys: {list(data.keys()) if isinstance(data, dict) else 'Not a dict'}")
-    
     # If it's already in L10 format, return as-is
     if 'NEW TO-DOS' in data or 'ISSUES LIST (IDS)' in data:
-        print("Already in L10 format")
         return data
     
     # Convert from alternative format
@@ -54,7 +50,6 @@ def convert_to_l10_format(data):
                 'DEPENDENCIES': commitment.get('dependencies', '')
             }
             converted['NEW TO-DOS'].append(todo_item)
-        print(f"Converted {len(converted['NEW TO-DOS'])} new commitments to NEW TO-DOS")
     
     # Map issues_discussed to ISSUES LIST (IDS)
     if 'issues_discussed' in data:
@@ -68,7 +63,6 @@ def convert_to_l10_format(data):
                 'notes': f"Decision: {issue.get('decision', '')} | Owner: {issue.get('owner', '')}"
             }
             converted['ISSUES LIST (IDS)'].append(issue_item)
-        print(f"Converted {len(converted['ISSUES LIST (IDS)'])} issues to ISSUES LIST (IDS)")
     
     # Map todo_review to TO-DO REVIEW
     if 'todo_review' in data:
@@ -81,7 +75,6 @@ def convert_to_l10_format(data):
                 'NOTES': todo.get('notes', '')
             }
             converted['TO-DO REVIEW'].append(todo_item)
-        print(f"Converted {len(converted['TO-DO REVIEW'])} todo reviews to TO-DO REVIEW")
     
     # Map headlines
     if 'headlines' in data:
@@ -91,14 +84,12 @@ def convert_to_l10_format(data):
                 converted['HEADLINES'].append(headline.get('text', str(headline)))
             else:
                 converted['HEADLINES'].append(str(headline))
-        print(f"Converted {len(converted['HEADLINES'])} headlines")
     
     # Copy other fields that might be present
     for key in ['MEETING RATING', 'average_rating', 'meeting_date', 'attendees']:
         if key in data:
             converted[key] = data[key]
     
-    print(f"Final converted keys: {list(converted.keys())}")
     return converted
 def parse_l10_text(text):
     """Parse the structured L10 text output into a dictionary format"""

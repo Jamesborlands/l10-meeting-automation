@@ -18,8 +18,7 @@ WEBHOOK_RETURN_URL = os.environ.get('WEBHOOK_RETURN_URL', '')
 @app.route('/health', methods=['GET'])
 def health():
     """Health check for Render"""
-    import datetime
-    return jsonify({'status': 'healthy', 'service': 'L10 Automation', 'version': '2.1', 'timestamp': datetime.datetime.now().isoformat()})
+    return jsonify({'status': 'healthy', 'service': 'L10 Automation'})
 
 @app.route('/debug', methods=['GET'])
 def debug():
@@ -30,28 +29,6 @@ def debug():
         'xlsx_files': [f for f in os.listdir('.') if f.endswith('.xlsx')]
     })
 
-@app.route('/test-conversion', methods=['POST'])
-def test_conversion():
-    """Test the data conversion function"""
-    try:
-        data = request.json
-        meeting_json = data.get('meeting_data', {})
-        
-        # Import and test conversion
-        from l10_processor import parse_l10_json
-        
-        parsed_data = parse_l10_json(meeting_json)
-        
-        return jsonify({
-            'original_keys': list(meeting_json.keys()) if isinstance(meeting_json, dict) else 'not_dict',
-            'converted_keys': list(parsed_data.keys()) if isinstance(parsed_data, dict) else 'not_dict',
-            'new_todos_count': len(parsed_data.get('NEW TO-DOS', [])),
-            'issues_count': len(parsed_data.get('ISSUES LIST (IDS)', [])),
-            'conversion_successful': 'NEW TO-DOS' in parsed_data or 'ISSUES LIST (IDS)' in parsed_data
-        })
-        
-    except Exception as e:
-        return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500
 
 @app.route('/process-l10', methods=['POST'])
 def process_l10():
@@ -68,31 +45,12 @@ def process_l10():
         excel_url = data.get('excel_url', EXCEL_STORAGE_URL)
         
         # Parse the meeting data
-        print(f"=== DEBUG: Raw meeting_json type: {type(meeting_json)} ===")
-        print(f"=== DEBUG: Raw meeting_json keys: {list(meeting_json.keys()) if isinstance(meeting_json, dict) else 'Not a dict'} ===")
-        
         if isinstance(meeting_json, str):
             meeting_data = parse_l10_json(meeting_json)
         else:
             meeting_data = parse_l10_json(meeting_json)  # Always call parse_l10_json to trigger conversion
         
-        print(f"=== DEBUG: After parse_l10_json, keys: {list(meeting_data.keys()) if isinstance(meeting_data, dict) else 'Not a dict'} ===")
-        
-        print(f"=== DEBUG: Parsed meeting data ===")
-        print(f"Meeting data keys: {list(meeting_data.keys())}")
-        print(f"NEW TO-DOS count: {len(meeting_data.get('NEW TO-DOS', []))}")
-        print(f"ISSUES LIST count: {len(meeting_data.get('ISSUES LIST (IDS)', []))}")
-        
-        # Debug the actual data
-        if meeting_data.get('NEW TO-DOS'):
-            print("NEW TO-DOS sample:")
-            for i, todo in enumerate(meeting_data.get('NEW TO-DOS', [])[:2]):  # First 2 items
-                print(f"  {i+1}. {todo}")
-        
-        if meeting_data.get('ISSUES LIST (IDS)'):
-            print("ISSUES LIST sample:")
-            for i, issue in enumerate(meeting_data.get('ISSUES LIST (IDS)', [])[:2]):  # First 2 items
-                print(f"  {i+1}. {issue}")
+        print(f"Parsed meeting data with {len(meeting_data.get('NEW TO-DOS', []))} new TODOs and {len(meeting_data.get('ISSUES LIST (IDS)', []))} issues")
         
         # Download the current Excel file or use template
         if excel_url:
