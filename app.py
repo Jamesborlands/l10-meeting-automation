@@ -49,7 +49,21 @@ def process_l10():
         else:
             meeting_data = meeting_json
         
-        print(f"Parsed meeting data with {len(meeting_data.get('NEW TO-DOS', []))} new TODOs")
+        print(f"=== DEBUG: Parsed meeting data ===")
+        print(f"Meeting data keys: {list(meeting_data.keys())}")
+        print(f"NEW TO-DOS count: {len(meeting_data.get('NEW TO-DOS', []))}")
+        print(f"ISSUES LIST count: {len(meeting_data.get('ISSUES LIST (IDS)', []))}")
+        
+        # Debug the actual data
+        if meeting_data.get('NEW TO-DOS'):
+            print("NEW TO-DOS sample:")
+            for i, todo in enumerate(meeting_data.get('NEW TO-DOS', [])[:2]):  # First 2 items
+                print(f"  {i+1}. {todo}")
+        
+        if meeting_data.get('ISSUES LIST (IDS)'):
+            print("ISSUES LIST sample:")
+            for i, issue in enumerate(meeting_data.get('ISSUES LIST (IDS)', [])[:2]):  # First 2 items
+                print(f"  {i+1}. {issue}")
         
         # Download the current Excel file or use template
         if excel_url:

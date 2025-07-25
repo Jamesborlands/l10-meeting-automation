@@ -90,11 +90,43 @@ class L10SheetAutomation:
     
     def add_ai_section(self, sheet, new_todos, new_issues):
         """Add AI identified items section with enhanced formatting"""
+        print(f"=== DEBUG: Adding AI section ===")
+        
+        # Validate and sanitize inputs
+        if not isinstance(new_todos, list):
+            print(f"WARNING: new_todos is not a list, got {type(new_todos)}: {new_todos}")
+            new_todos = []
+        
+        if not isinstance(new_issues, list):
+            print(f"WARNING: new_issues is not a list, got {type(new_issues)}: {new_issues}")
+            new_issues = []
+        
+        print(f"New TODOs received: {len(new_todos)}")
+        print(f"New Issues received: {len(new_issues)}")
+        
+        if new_todos:
+            print("TODO items:")
+            for i, todo in enumerate(new_todos):
+                if not isinstance(todo, dict):
+                    print(f"  {i+1}. WARNING: Invalid TODO format, got {type(todo)}: {todo}")
+                    continue
+                print(f"  {i+1}. WHO: {todo.get('WHO', 'N/A')}, TO-DO: {todo.get('TO-DO', 'N/A')}, DUE DATE: {todo.get('DUE DATE', todo.get('DUE', 'N/A'))}")
+        
+        if new_issues:
+            print("Issue items:")
+            for i, issue in enumerate(new_issues):
+                if not isinstance(issue, dict):
+                    print(f"  {i+1}. WARNING: Invalid Issue format, got {type(issue)}: {issue}")
+                    continue
+                print(f"  {i+1}. Issue: {issue.get('issue_description', issue.get('ISSUE', 'N/A'))}, Raised by: {issue.get('who_raised_it', issue.get('RAISED BY', 'N/A'))}")
+        
         # Find the last row with content
         last_row = sheet.max_row
+        print(f"Last row in sheet: {last_row}")
         
         # Add some space
         start_row = last_row + 3
+        print(f"Starting AI section at row: {start_row}")
         
         # Add header with better styling
         header_cell = sheet.cell(row=start_row, column=1, 
@@ -124,18 +156,26 @@ class L10SheetAutomation:
             current_row += 1
             
             for todo in new_todos:
-                sheet.cell(row=current_row, column=1, value=todo.get('WHO', 'TBD'))
-                sheet.cell(row=current_row, column=2, value=todo.get('TO-DO', ''))
-                sheet.cell(row=current_row, column=3, value='No')
-                sheet.cell(row=current_row, column=4, value=todo.get('DUE DATE', todo.get('DUE', 'Not specified')))
-                
-                # Combine context and dependencies
-                notes = todo.get('CONTEXT', '')
-                if todo.get('DEPENDENCIES'):
-                    notes += f" | Dependencies: {todo['DEPENDENCIES']}"
-                sheet.cell(row=current_row, column=5, value=notes)
-                
-                current_row += 1
+                try:
+                    if not isinstance(todo, dict):
+                        print(f"Skipping invalid TODO: {todo}")
+                        continue
+                    
+                    sheet.cell(row=current_row, column=1, value=str(todo.get('WHO', 'TBD')))
+                    sheet.cell(row=current_row, column=2, value=str(todo.get('TO-DO', '')))
+                    sheet.cell(row=current_row, column=3, value='No')
+                    sheet.cell(row=current_row, column=4, value=str(todo.get('DUE DATE', todo.get('DUE', 'Not specified'))))
+                    
+                    # Combine context and dependencies
+                    notes = str(todo.get('CONTEXT', ''))
+                    if todo.get('DEPENDENCIES'):
+                        notes += f" | Dependencies: {todo['DEPENDENCIES']}"
+                    sheet.cell(row=current_row, column=5, value=notes)
+                    
+                    current_row += 1
+                except Exception as e:
+                    print(f"Error processing TODO {todo}: {e}")
+                    continue
         
         # Add space before issues
         current_row += 1
@@ -157,20 +197,30 @@ class L10SheetAutomation:
             current_row += 1
             
             for issue in new_issues:
-                sheet.cell(row=current_row, column=1, value=issue.get('who_raised_it', issue.get('RAISED BY', 'Unknown')))
-                sheet.cell(row=current_row, column=2, value=issue.get('issue_description', issue.get('ISSUE', '')))
-                sheet.cell(row=current_row, column=3, value=issue.get('root_cause', issue.get('CONTEXT', '')))
-                sheet.cell(row=current_row, column=4, value=issue.get('related_discussions', issue.get('DISCUSSION', '')))
-                
-                # Combine decision and owner
-                decision_owner = issue.get('DECISION', '')
-                if issue.get('OWNER'):
-                    decision_owner += f" (Owner: {issue['OWNER']})"
-                sheet.cell(row=current_row, column=5, value=decision_owner)
-                
-                current_row += 1
+                try:
+                    if not isinstance(issue, dict):
+                        print(f"Skipping invalid Issue: {issue}")
+                        continue
+                    
+                    sheet.cell(row=current_row, column=1, value=str(issue.get('who_raised_it', issue.get('RAISED BY', 'Unknown'))))
+                    sheet.cell(row=current_row, column=2, value=str(issue.get('issue_description', issue.get('ISSUE', ''))))
+                    sheet.cell(row=current_row, column=3, value=str(issue.get('root_cause', issue.get('CONTEXT', ''))))
+                    sheet.cell(row=current_row, column=4, value=str(issue.get('related_discussions', issue.get('DISCUSSION', ''))))
+                    
+                    # Combine decision and owner
+                    decision_owner = str(issue.get('DECISION', ''))
+                    if issue.get('OWNER'):
+                        decision_owner += f" (Owner: {issue['OWNER']})"
+                    sheet.cell(row=current_row, column=5, value=decision_owner)
+                    
+                    current_row += 1
+                except Exception as e:
+                    print(f"Error processing Issue {issue}: {e}")
+                    continue
         
         print(f"Added enhanced AI section starting at row {start_row}")
+        print(f"AI section ended at row {current_row}")
+        print(f"Total rows added: {current_row - start_row}")
         return current_row
     
     def process_meeting_output(self, meeting_text):
@@ -232,6 +282,11 @@ class L10SheetAutomation:
         
         # Add AI section with new items
         new_issues = meeting_data.get('ISSUES LIST (IDS)', [])
+        print(f"=== DEBUG: Before adding AI section (create_next_l10_sheet) ===")
+        print(f"Meeting data keys: {list(meeting_data.keys())}")
+        print(f"Truly new todos: {len(truly_new_todos)}")
+        print(f"New issues: {len(new_issues)}")
+        
         self.add_ai_section(new_sheet, truly_new_todos, new_issues)
         
         # Save the workbook
@@ -287,6 +342,11 @@ class L10SheetAutomation:
         
         # Add AI section with new items
         new_issues = meeting_data.get('ISSUES LIST (IDS)', [])
+        print(f"=== DEBUG: Before adding AI section (create_next_l10_sheet) ===")
+        print(f"Meeting data keys: {list(meeting_data.keys())}")
+        print(f"Truly new todos: {len(truly_new_todos)}")
+        print(f"New issues: {len(new_issues)}")
+        
         self.add_ai_section(new_sheet, truly_new_todos, new_issues)
         
         # Save the workbook
