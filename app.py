@@ -3,7 +3,8 @@ import os
 import tempfile
 import shutil
 from datetime import datetime
-from l10_processor import L10Processor, parse_l10_json
+from l10_sheet_automation import L10SheetAutomation
+from l10_processor import parse_l10_json
 import traceback
 import requests
 from io import BytesIO
@@ -19,6 +20,15 @@ def health():
     """Health check for Render"""
     return jsonify({'status': 'healthy', 'service': 'L10 Automation'})
 
+@app.route('/debug', methods=['GET'])
+def debug():
+    """Debug endpoint to check server state"""
+    return jsonify({
+        'current_dir': os.getcwd(),
+        'files': os.listdir('.'),
+        'xlsx_files': [f for f in os.listdir('.') if f.endswith('.xlsx')]
+    })
+
 @app.route('/process-l10', methods=['POST'])
 def process_l10():
     """Main webhook endpoint for Zapier"""
@@ -29,7 +39,6 @@ def process_l10():
         data = request.json
         meeting_json = data.get('meeting_data', {})
         excel_url = data.get('excel_url', EXCEL_STORAGE_URL)
-        return_method = data.get('return_method', 'file')
         
         # Parse the meeting data
         if isinstance(meeting_json, str):
@@ -39,7 +48,7 @@ def process_l10():
         
         print(f"Parsed meeting data with {len(meeting_data.get('NEW TO-DOS', []))} new TODOs")
         
-        # Download the current Excel file
+        # Download the current Excel file or use template
         if excel_url:
             print(f"Downloading Excel from: {excel_url}")
             response = requests.get(excel_url)
@@ -54,26 +63,30 @@ def process_l10():
             if not os.path.exists(excel_file):
                 return jsonify({'error': 'No Excel file provided and no template found'}), 400
         
-        # Generate output filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_file = f"L10_Meeting_{timestamp}.xlsx"
+        # Create a working copy to preserve the original
+        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
+            shutil.copy(excel_file, tmp.name)
+            working_file = tmp.name
         
-        # Process the automation
-        processor = L10Processor()
-        result = processor.process_l10_automation(
-            excel_file,
+        print(f"Working with Excel file: {working_file}")
+        
+        # Use L10SheetAutomation which adds a new sheet tab
+        automation = L10SheetAutomation(working_file)
+        result = automation.create_next_l10_sheet_from_data(
             meeting_data,
-            output_file,
             'weekly'
         )
         
         print(f"Automation complete: {result}")
         
-        # Return file directly to Zapier
+        # Generate filename with the new sheet name
+        output_filename = f"L10_Meeting_{result['new_sheet_name'].replace(' ', '_')}.xlsx"
+        
+        # Return the updated file with the new sheet tab
         return send_file(
-            output_file,
+            working_file,
             as_attachment=True,
-            download_name=output_file,
+            download_name=output_filename,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
         
@@ -84,6 +97,17 @@ def process_l10():
             'error': str(e),
             'traceback': traceback.format_exc()
         }), 500
+    
+    finally:
+        # Cleanup temp files
+        for temp_file in ['excel_file', 'working_file']:
+            if temp_file in locals():
+                file_path = locals()[temp_file]
+                if file_path and os.path.exists(file_path):
+                    try:
+                        os.remove(file_path)
+                    except:
+                        pass
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
