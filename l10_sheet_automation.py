@@ -127,7 +127,7 @@ class L10SheetAutomation:
                 sheet.cell(row=current_row, column=1, value=todo.get('WHO', 'TBD'))
                 sheet.cell(row=current_row, column=2, value=todo.get('TO-DO', ''))
                 sheet.cell(row=current_row, column=3, value='No')
-                sheet.cell(row=current_row, column=4, value=todo.get('DUE', 'Not specified'))
+                sheet.cell(row=current_row, column=4, value=todo.get('DUE DATE', todo.get('DUE', 'Not specified')))
                 
                 # Combine context and dependencies
                 notes = todo.get('CONTEXT', '')
@@ -157,10 +157,10 @@ class L10SheetAutomation:
             current_row += 1
             
             for issue in new_issues:
-                sheet.cell(row=current_row, column=1, value=issue.get('RAISED BY', 'Unknown'))
-                sheet.cell(row=current_row, column=2, value=issue.get('ISSUE', ''))
-                sheet.cell(row=current_row, column=3, value=issue.get('CONTEXT', ''))
-                sheet.cell(row=current_row, column=4, value=issue.get('DISCUSSION', ''))
+                sheet.cell(row=current_row, column=1, value=issue.get('who_raised_it', issue.get('RAISED BY', 'Unknown')))
+                sheet.cell(row=current_row, column=2, value=issue.get('issue_description', issue.get('ISSUE', '')))
+                sheet.cell(row=current_row, column=3, value=issue.get('root_cause', issue.get('CONTEXT', '')))
+                sheet.cell(row=current_row, column=4, value=issue.get('related_discussions', issue.get('DISCUSSION', '')))
                 
                 # Combine decision and owner
                 decision_owner = issue.get('DECISION', '')
