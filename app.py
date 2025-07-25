@@ -18,7 +18,8 @@ WEBHOOK_RETURN_URL = os.environ.get('WEBHOOK_RETURN_URL', '')
 @app.route('/health', methods=['GET'])
 def health():
     """Health check for Render"""
-    return jsonify({'status': 'healthy', 'service': 'L10 Automation', 'version': '2.0'})
+    import datetime
+    return jsonify({'status': 'healthy', 'service': 'L10 Automation', 'version': '2.1', 'timestamp': datetime.datetime.now().isoformat()})
 
 @app.route('/debug', methods=['GET'])
 def debug():

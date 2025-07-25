@@ -8,7 +8,7 @@ import json
 import os
 
 # Replace this with your actual Render URL
-RENDER_URL = "https://your-app-name.onrender.com"
+RENDER_URL = "https://l10-meeting-automation-29fl.onrender.com"
 
 def test_render_health():
     """Test if the Render app is running"""
