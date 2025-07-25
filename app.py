@@ -32,6 +32,9 @@ def debug():
 @app.route('/process-l10', methods=['POST'])
 def process_l10():
     """Main webhook endpoint for Zapier"""
+    working_file = None
+    excel_file = None
+    
     try:
         print("Received L10 processing request")
         
@@ -72,12 +75,24 @@ def process_l10():
         
         # Use L10SheetAutomation which adds a new sheet tab
         automation = L10SheetAutomation(working_file)
+        
+        # Get sheet names before
+        print(f"Sheets before: {automation.wb.sheetnames}")
+        
+        # Process the meeting data
         result = automation.create_next_l10_sheet_from_data(
             meeting_data,
             'weekly'
         )
         
-        print(f"Automation complete: {result}")
+        # CRITICAL: The automation saves to self.workbook_path which is the temp file
+        # But we need to make sure it's actually saved
+        # Force save to ensure changes are written
+        automation.wb.save(working_file)
+        automation.wb.close()
+        
+        print(f"Sheets after save: {result}")
+        print(f"File size: {os.path.getsize(working_file)} bytes")
         
         # Generate filename with the new sheet name
         output_filename = f"L10_Meeting_{result['new_sheet_name'].replace(' ', '_')}.xlsx"
@@ -100,14 +115,12 @@ def process_l10():
     
     finally:
         # Cleanup temp files
-        for temp_file in ['excel_file', 'working_file']:
-            if temp_file in locals():
-                file_path = locals()[temp_file]
-                if file_path and os.path.exists(file_path):
-                    try:
-                        os.remove(file_path)
-                    except:
-                        pass
+        for temp_file in [excel_file, working_file]:
+            if temp_file and os.path.exists(temp_file) and temp_file.startswith('/tmp'):
+                try:
+                    os.remove(temp_file)
+                except:
+                    pass
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
