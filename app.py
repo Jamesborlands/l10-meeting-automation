@@ -67,10 +67,15 @@ def process_l10():
         excel_url = data.get('excel_url', EXCEL_STORAGE_URL)
         
         # Parse the meeting data
+        print(f"=== DEBUG: Raw meeting_json type: {type(meeting_json)} ===")
+        print(f"=== DEBUG: Raw meeting_json keys: {list(meeting_json.keys()) if isinstance(meeting_json, dict) else 'Not a dict'} ===")
+        
         if isinstance(meeting_json, str):
             meeting_data = parse_l10_json(meeting_json)
         else:
-            meeting_data = meeting_json
+            meeting_data = parse_l10_json(meeting_json)  # Always call parse_l10_json to trigger conversion
+        
+        print(f"=== DEBUG: After parse_l10_json, keys: {list(meeting_data.keys()) if isinstance(meeting_data, dict) else 'Not a dict'} ===")
         
         print(f"=== DEBUG: Parsed meeting data ===")
         print(f"Meeting data keys: {list(meeting_data.keys())}")
