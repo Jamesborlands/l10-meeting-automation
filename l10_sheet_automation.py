@@ -25,7 +25,7 @@ class L10SheetAutomation:
     def duplicate_sheet(self, source_sheet, new_date):
         """Duplicate a sheet and update the date"""
         # Create new sheet name (e.g., "Jul 23 2025" or match your format)
-        new_sheet_name = new_date.strftime("%b %d %Y")
+        new_sheet_name = new_date.strftime("%-m.%d.%Y")
         
         # Copy the sheet
         new_sheet = self.wb.copy_worksheet(source_sheet)
