@@ -29,6 +29,29 @@ def debug():
         'xlsx_files': [f for f in os.listdir('.') if f.endswith('.xlsx')]
     })
 
+@app.route('/test-conversion', methods=['POST'])
+def test_conversion():
+    """Test the data conversion function"""
+    try:
+        data = request.json
+        meeting_json = data.get('meeting_data', {})
+        
+        # Import and test conversion
+        from l10_processor import parse_l10_json
+        
+        parsed_data = parse_l10_json(meeting_json)
+        
+        return jsonify({
+            'original_keys': list(meeting_json.keys()) if isinstance(meeting_json, dict) else 'not_dict',
+            'converted_keys': list(parsed_data.keys()) if isinstance(parsed_data, dict) else 'not_dict',
+            'new_todos_count': len(parsed_data.get('NEW TO-DOS', [])),
+            'issues_count': len(parsed_data.get('ISSUES LIST (IDS)', [])),
+            'conversion_successful': 'NEW TO-DOS' in parsed_data or 'ISSUES LIST (IDS)' in parsed_data
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500
+
 @app.route('/process-l10', methods=['POST'])
 def process_l10():
     """Main webhook endpoint for Zapier"""
