@@ -29,6 +29,24 @@ def debug():
         'xlsx_files': [f for f in os.listdir('.') if f.endswith('.xlsx')]
     })
 
+@app.route('/echo', methods=['POST'])
+def echo():
+    """Echo endpoint to see exactly what Zapier sends"""
+    try:
+        raw_data = request.get_data(as_text=True)
+        json_data = request.json
+        
+        return jsonify({
+            'raw_data_length': len(raw_data),
+            'raw_data_preview': raw_data[:500],
+            'json_keys': list(json_data.keys()) if json_data else None,
+            'json_structure': str(json_data)[:500] if json_data else None,
+            'headers': dict(request.headers),
+            'content_type': request.content_type
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/process-l10', methods=['POST'])
 def process_l10():
@@ -39,9 +57,39 @@ def process_l10():
     try:
         print("Received L10 processing request")
         
+        # Capture raw request data for debugging
+        raw_data = request.get_data(as_text=True)
+        print(f"=== RAW REQUEST DATA (first 500 chars) ===")
+        print(raw_data[:500])
+        
         # Get JSON from Zapier
         data = request.json
-        meeting_json = data.get('meeting_data', {})
+        print(f"=== PARSED REQUEST STRUCTURE ===")
+        print(f"Top-level keys: {list(data.keys()) if data else 'None'}")
+        
+        # Try different possible data locations
+        meeting_json = None
+        
+        # Try standard location
+        if 'meeting_data' in data:
+            meeting_json = data['meeting_data']
+            print("Found meeting_data in standard location")
+        # Try if data IS the meeting data
+        elif 'NEW TO-DOS' in data or 'new_commitments' in data:
+            meeting_json = data
+            print("Data IS the meeting data (no wrapper)")
+        # Try nested structure
+        elif 'data' in data and isinstance(data['data'], dict):
+            if 'meeting_data' in data['data']:
+                meeting_json = data['data']['meeting_data']
+                print("Found meeting_data in nested structure")
+        
+        if meeting_json is None:
+            meeting_json = data  # Last resort - use entire payload
+            print("Using entire payload as meeting data")
+        
+        print(f"Meeting JSON type: {type(meeting_json)}")
+        print(f"Meeting JSON keys: {list(meeting_json.keys()) if isinstance(meeting_json, dict) else 'Not a dict'}")
         excel_url = data.get('excel_url', EXCEL_STORAGE_URL)
         
         # Parse the meeting data

@@ -297,6 +297,19 @@ class L10SheetAutomation:
         # Get new TO-DOs from meeting data directly
         new_todos_from_meeting = meeting_data.get('NEW TO-DOS', [])
         
+        # FAILSAFE: Also check for alternative formats
+        if not new_todos_from_meeting and 'new_commitments' in meeting_data:
+            print("FAILSAFE: Converting new_commitments to NEW TO-DOS")
+            new_todos_from_meeting = []
+            for commitment in meeting_data['new_commitments']:
+                new_todos_from_meeting.append({
+                    'WHO': commitment.get('who', ''),
+                    'TO-DO': commitment.get('task', ''),
+                    'DUE DATE': commitment.get('due_date', ''),
+                    'CONTEXT': commitment.get('context', ''),
+                    'DEPENDENCIES': commitment.get('dependencies', '')
+                })
+        
         # Filter out duplicates
         truly_new_todos = []
         for new_todo in new_todos_from_meeting:
@@ -313,6 +326,30 @@ class L10SheetAutomation:
         
         # Add AI section with new items
         new_issues = meeting_data.get('ISSUES LIST (IDS)', [])
+        
+        # FAILSAFE: Also check for alternative formats
+        if not new_issues and 'issues_discussed' in meeting_data:
+            print("FAILSAFE: Converting issues_discussed to ISSUES LIST (IDS)")
+            new_issues = []
+            for issue in meeting_data['issues_discussed']:
+                new_issues.append({
+                    'issue_description': issue.get('issue', ''),
+                    'who_raised_it': issue.get('raised_by', ''),
+                    'root_cause': issue.get('context', ''),
+                    'related_discussions': ', '.join(issue.get('discussion_points', [])) if issue.get('discussion_points') else '',
+                    'notes': f"Decision: {issue.get('decision', '')} | Owner: {issue.get('owner', '')}"
+                })
+        
+        # ULTIMATE FAILSAFE: If still no data, create debug entry
+        if not truly_new_todos and not new_issues:
+            print("WARNING: No data found! Adding debug entry")
+            truly_new_todos = [{
+                'WHO': 'System',
+                'TO-DO': 'DEBUG: No meeting data was found - check Zapier payload structure',
+                'DUE DATE': 'Immediate',
+                'CONTEXT': f'Meeting data keys: {list(meeting_data.keys())}',
+                'DEPENDENCIES': 'Check /echo endpoint with same payload'
+            }]
         
         self.add_ai_section(new_sheet, truly_new_todos, new_issues)
         
