@@ -19,14 +19,87 @@ def parse_l10_json(input_data):
                     input_data = input_data[5:]
             
             # Parse JSON
-            return json.loads(input_data.strip())
+            parsed_data = json.loads(input_data.strip())
+            return convert_to_l10_format(parsed_data)
         except json.JSONDecodeError as e:
             print(f"JSON parse error: {e}")
             # Fall back to text parsing
             return parse_l10_text(input_data)
     
-    # If it's already a dict, return it
-    return input_data
+    # If it's already a dict, convert it to L10 format
+    return convert_to_l10_format(input_data)
+
+def convert_to_l10_format(data):
+    """Convert various JSON formats to L10 format"""
+    print(f"=== DEBUG: Converting data format ===")
+    print(f"Input keys: {list(data.keys()) if isinstance(data, dict) else 'Not a dict'}")
+    
+    # If it's already in L10 format, return as-is
+    if 'NEW TO-DOS' in data or 'ISSUES LIST (IDS)' in data:
+        print("Already in L10 format")
+        return data
+    
+    # Convert from alternative format
+    converted = {}
+    
+    # Map new_commitments to NEW TO-DOS
+    if 'new_commitments' in data:
+        converted['NEW TO-DOS'] = []
+        for commitment in data['new_commitments']:
+            todo_item = {
+                'WHO': commitment.get('who', ''),
+                'TO-DO': commitment.get('task', ''),
+                'DUE DATE': commitment.get('due_date', ''),
+                'CONTEXT': commitment.get('context', ''),
+                'DEPENDENCIES': commitment.get('dependencies', '')
+            }
+            converted['NEW TO-DOS'].append(todo_item)
+        print(f"Converted {len(converted['NEW TO-DOS'])} new commitments to NEW TO-DOS")
+    
+    # Map issues_discussed to ISSUES LIST (IDS)
+    if 'issues_discussed' in data:
+        converted['ISSUES LIST (IDS)'] = []
+        for issue in data['issues_discussed']:
+            issue_item = {
+                'issue_description': issue.get('issue', ''),
+                'who_raised_it': issue.get('raised_by', ''),
+                'root_cause': issue.get('context', ''),
+                'related_discussions': ', '.join(issue.get('discussion_points', [])) if issue.get('discussion_points') else '',
+                'notes': f"Decision: {issue.get('decision', '')} | Owner: {issue.get('owner', '')}"
+            }
+            converted['ISSUES LIST (IDS)'].append(issue_item)
+        print(f"Converted {len(converted['ISSUES LIST (IDS)'])} issues to ISSUES LIST (IDS)")
+    
+    # Map todo_review to TO-DO REVIEW
+    if 'todo_review' in data:
+        converted['TO-DO REVIEW'] = []
+        for todo in data['todo_review']:
+            todo_item = {
+                'WHO': todo.get('who', ''),
+                'TO-DO': todo.get('todo', ''),
+                'DONE?': 'Yes' if todo.get('status', '').lower() in ['done', 'completed'] else 'No',
+                'NOTES': todo.get('notes', '')
+            }
+            converted['TO-DO REVIEW'].append(todo_item)
+        print(f"Converted {len(converted['TO-DO REVIEW'])} todo reviews to TO-DO REVIEW")
+    
+    # Map headlines
+    if 'headlines' in data:
+        converted['HEADLINES'] = []
+        for headline in data['headlines']:
+            if isinstance(headline, dict):
+                converted['HEADLINES'].append(headline.get('text', str(headline)))
+            else:
+                converted['HEADLINES'].append(str(headline))
+        print(f"Converted {len(converted['HEADLINES'])} headlines")
+    
+    # Copy other fields that might be present
+    for key in ['MEETING RATING', 'average_rating', 'meeting_date', 'attendees']:
+        if key in data:
+            converted[key] = data[key]
+    
+    print(f"Final converted keys: {list(converted.keys())}")
+    return converted
 def parse_l10_text(text):
     """Parse the structured L10 text output into a dictionary format"""
     sections = {
