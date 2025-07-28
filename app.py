@@ -8,6 +8,7 @@ from l10_processor import parse_l10_json
 import traceback
 import requests
 from io import BytesIO
+import json
 
 app = Flask(__name__)
 
@@ -69,9 +70,25 @@ def process_l10():
         
         # Try different possible data locations
         meeting_json = None
+        meeting_date = None
         
+        # Check if Zapier sent data in "JSON" field (common pattern)
+        if 'JSON' in data and isinstance(data['JSON'], str):
+            print("Found data in JSON field from Zapier")
+            # Parse the JSON string
+            try:
+                # Remove 'json' prefix if present
+                json_str = data['JSON']
+                if json_str.startswith('json '):
+                    json_str = json_str[5:]
+                meeting_json = json.loads(json_str)
+                print(f"Parsed JSON data successfully: {list(meeting_json.keys()) if isinstance(meeting_json, dict) else 'not a dict'}")
+            except:
+                # If JSON parsing fails, treat as text
+                meeting_json = data['JSON']
+                print("Treating JSON field as raw text")
         # Try standard location
-        if 'meeting_data' in data:
+        elif 'meeting_data' in data:
             meeting_json = data['meeting_data']
             print("Found meeting_data in standard location")
         # Try if data IS the meeting data
@@ -87,6 +104,11 @@ def process_l10():
         if meeting_json is None:
             meeting_json = data  # Last resort - use entire payload
             print("Using entire payload as meeting data")
+        
+        # Extract meeting date if provided
+        if 'meeting_date' in data:
+            meeting_date = data['meeting_date']
+            print(f"Found meeting date: {meeting_date}")
         
         print(f"Meeting JSON type: {type(meeting_json)}")
         print(f"Meeting JSON keys: {list(meeting_json.keys()) if isinstance(meeting_json, dict) else 'Not a dict'}")
@@ -128,8 +150,12 @@ def process_l10():
         # Get sheet names before
         print(f"Sheets before: {automation.wb.sheetnames}")
         
-        # Process the meeting data - update current sheet instead of creating new one
-        result = automation.update_current_sheet_with_ai_data(meeting_data)
+        # Process the meeting data - create new sheet with AI section
+        result = automation.create_next_l10_sheet_from_data(
+            meeting_data,
+            'weekly',
+            meeting_date=meeting_date
+        )
         
         # CRITICAL: The automation saves to self.workbook_path which is the temp file
         # But we need to make sure it's actually saved
@@ -140,8 +166,8 @@ def process_l10():
         print(f"Sheets after save: {result}")
         print(f"File size: {os.path.getsize(working_file)} bytes")
         
-        # Generate filename with the updated sheet name
-        output_filename = f"L10_Meeting_{result['sheet_name'].replace(' ', '_')}_Updated.xlsx"
+        # Generate filename with the new sheet name
+        output_filename = f"L10_Meeting_{result['new_sheet_name'].replace(' ', '_')}.xlsx"
         
         # Return the updated file with the new sheet tab
         return send_file(

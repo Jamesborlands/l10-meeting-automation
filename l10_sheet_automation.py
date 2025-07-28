@@ -24,8 +24,12 @@ class L10SheetAutomation:
     
     def duplicate_sheet(self, source_sheet, new_date):
         """Duplicate a sheet and update the date"""
-        # Create new sheet name (e.g., "Jul 23 2025" or match your format)
-        new_sheet_name = new_date.strftime("%-m.%d.%Y")
+        # Create new sheet name with format m.dd.yyyy (no leading zeros on month)
+        # Use platform-independent formatting
+        month = new_date.month  # This gives us the month without leading zero
+        day = new_date.day
+        year = new_date.year
+        new_sheet_name = f"{month}.{day:02d}.{year}"
         
         # Copy the sheet
         new_sheet = self.wb.copy_worksheet(source_sheet)
@@ -388,7 +392,7 @@ class L10SheetAutomation:
             'existing_todos_count': len(existing_todos)
         }
     
-    def create_next_l10_sheet_from_data(self, meeting_data, meeting_cadence='weekly'):
+    def create_next_l10_sheet_from_data(self, meeting_data, meeting_cadence='weekly', meeting_date=None):
         """Process meeting data directly without text file"""
         print("=== L10 SHEET AUTOMATION (Direct Data) ===")
         
@@ -396,12 +400,32 @@ class L10SheetAutomation:
         latest_sheet = self.get_latest_sheet()
         print(f"Using sheet: {latest_sheet.title}")
         
-        # Calculate next meeting date
-        today = datetime.now()
-        if meeting_cadence == 'weekly':
-            next_date = today + timedelta(days=7)
+        # Use provided meeting date or calculate next meeting date
+        if meeting_date:
+            # Parse the provided date (expecting mm.dd.yyyy or similar format)
+            try:
+                # Try different date formats
+                for fmt in ['%m.%d.%Y', '%m/%d/%Y', '%m-%d-%Y', '%Y-%m-%d']:
+                    try:
+                        next_date = datetime.strptime(meeting_date, fmt)
+                        print(f"Parsed meeting date: {next_date.strftime('%m.%d.%Y')}")
+                        break
+                    except ValueError:
+                        continue
+                else:
+                    # If no format matches, use today + 7 days
+                    print(f"Could not parse date '{meeting_date}', using default")
+                    next_date = datetime.now() + timedelta(days=7)
+            except Exception as e:
+                print(f"Error parsing date: {e}")
+                next_date = datetime.now() + timedelta(days=7)
         else:
-            next_date = today + timedelta(days=14)
+            # Calculate based on cadence
+            today = datetime.now()
+            if meeting_cadence == 'weekly':
+                next_date = today + timedelta(days=7)
+            else:
+                next_date = today + timedelta(days=14)
         
         # Duplicate the sheet
         new_sheet = self.duplicate_sheet(latest_sheet, next_date)
