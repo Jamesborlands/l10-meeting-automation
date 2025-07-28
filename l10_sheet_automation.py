@@ -88,8 +88,8 @@ class L10SheetAutomation:
         
         return existing_todos
     
-    def add_ai_section(self, sheet, new_todos, new_issues):
-        """Add AI identified items section with enhanced formatting"""
+    def add_ai_section(self, sheet, new_todos, new_issues, existing_todos=[]):
+        """Add AI identified items section matching the exact format from screenshot"""
         # Validate and sanitize inputs
         if not isinstance(new_todos, list):
             print(f"WARNING: new_todos is not a list, got {type(new_todos)}")
@@ -98,8 +98,11 @@ class L10SheetAutomation:
         if not isinstance(new_issues, list):
             print(f"WARNING: new_issues is not a list, got {type(new_issues)}")
             new_issues = []
+            
+        if not isinstance(existing_todos, list):
+            existing_todos = []
         
-        print(f"Adding AI section with {len(new_todos)} TODOs and {len(new_issues)} issues")
+        print(f"Adding AI section with {len(new_todos)} TODOs, {len(new_issues)} issues, and {len(existing_todos)} existing TODOs")
         
         # Find the last row with content
         last_row = sheet.max_row
@@ -107,96 +110,209 @@ class L10SheetAutomation:
         # Add some space
         start_row = last_row + 3
         
-        # Add header with better styling
+        # Add main header with blue background and white text
         header_cell = sheet.cell(row=start_row, column=1, 
                                 value="AI IDENTIFIED ITEMS (Review & Move to Appropriate Sections)")
-        header_cell.font = Font(bold=True, color="0066CC", size=12)
+        header_cell.font = Font(bold=True, color="FFFFFF", size=12)
+        header_cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        header_cell.alignment = Alignment(horizontal="left", vertical="center")
         
-        # Merge cells for header
+        # Merge cells for main header across all columns
         sheet.merge_cells(start_row=start_row, start_column=1, 
                          end_row=start_row, end_column=5)
         
-        current_row = start_row + 2
+        current_row = start_row + 1
         
-        # Add new TO-DOs with enhanced information
-        if new_todos:
-            sheet.cell(row=current_row, column=1, value="Potential New TO-DOs:")
-            sheet.cell(row=current_row, column=1).font = Font(bold=True, italic=True)
-            current_row += 1
-            
-            # Headers for TO-DO section
-            headers = ['WHO', 'TO-DO', 'DONE?', 'DUE DATE', 'NOTES/CONTEXT']
+        # Add TO-DO section with blue headers
+        if new_todos or existing_todos:
+            # TO-DO section headers with blue background
+            headers = ['Who', "To-do's", 'When', 'Context', 'Dependencies']
             for col, header in enumerate(headers, 1):
                 cell = sheet.cell(row=current_row, column=col, value=header)
-                cell.font = Font(bold=True)
-                cell.fill = PatternFill(start_color="E0E0E0", 
-                                       end_color="E0E0E0", 
-                                       fill_type="solid")
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+                cell.alignment = Alignment(horizontal="left", vertical="center")
             current_row += 1
             
+            # Add new TODOs
             for todo in new_todos:
                 try:
                     if not isinstance(todo, dict):
                         continue
                     
-                    sheet.cell(row=current_row, column=1, value=str(todo.get('WHO', 'TBD')))
+                    sheet.cell(row=current_row, column=1, value=str(todo.get('WHO', '')))
                     sheet.cell(row=current_row, column=2, value=str(todo.get('TO-DO', '')))
-                    sheet.cell(row=current_row, column=3, value='No')
-                    sheet.cell(row=current_row, column=4, value=str(todo.get('DUE DATE', todo.get('DUE', 'Not specified'))))
-                    
-                    # Combine context and dependencies
-                    notes = str(todo.get('CONTEXT', ''))
-                    if todo.get('DEPENDENCIES'):
-                        notes += f" | Dependencies: {todo['DEPENDENCIES']}"
-                    sheet.cell(row=current_row, column=5, value=notes)
+                    sheet.cell(row=current_row, column=3, value=str(todo.get('DUE DATE', todo.get('WHEN', 'Next meeting'))))
+                    sheet.cell(row=current_row, column=4, value=str(todo.get('CONTEXT', '')))
+                    sheet.cell(row=current_row, column=5, value=str(todo.get('DEPENDENCIES', 'None')))
                     
                     current_row += 1
                 except Exception as e:
                     print(f"Error processing TODO: {e}")
                     continue
         
-        # Add space before issues
+        # Add space before Issue List
         current_row += 1
         
-        # Add new Issues with enhanced information
+        # Add Issue List section with blue headers
         if new_issues:
-            sheet.cell(row=current_row, column=1, value="Potential New Issues:")
-            sheet.cell(row=current_row, column=1).font = Font(bold=True, italic=True)
+            # Issue List header
+            issue_header = sheet.cell(row=current_row, column=1, value="Issue List")
+            issue_header.font = Font(bold=True, color="FFFFFF")
+            issue_header.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            issue_header.alignment = Alignment(horizontal="left", vertical="center")
+            sheet.merge_cells(start_row=current_row, start_column=1, end_row=current_row, end_column=5)
             current_row += 1
             
-            # Headers for Issues section
-            headers = ['RAISED BY', 'ISSUE', 'CONTEXT', 'DISCUSSION', 'DECISION/OWNER']
-            for col, header in enumerate(headers, 1):
+            # Issue section headers with blue background
+            issue_headers = ['Issue_description', 'Raised By', 'Issue Cause', 'Related Discussions', 'Notes']
+            for col, header in enumerate(issue_headers, 1):
                 cell = sheet.cell(row=current_row, column=col, value=header)
-                cell.font = Font(bold=True)
-                cell.fill = PatternFill(start_color="E0E0E0", 
-                                       end_color="E0E0E0", 
-                                       fill_type="solid")
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+                cell.alignment = Alignment(horizontal="left", vertical="center")
             current_row += 1
             
+            # Add issues
             for issue in new_issues:
                 try:
                     if not isinstance(issue, dict):
                         continue
                     
-                    sheet.cell(row=current_row, column=1, value=str(issue.get('who_raised_it', issue.get('RAISED BY', 'Unknown'))))
-                    sheet.cell(row=current_row, column=2, value=str(issue.get('issue_description', issue.get('ISSUE', ''))))
-                    sheet.cell(row=current_row, column=3, value=str(issue.get('root_cause', issue.get('CONTEXT', ''))))
-                    sheet.cell(row=current_row, column=4, value=str(issue.get('related_discussions', issue.get('DISCUSSION', ''))))
-                    
-                    # Combine decision and owner
-                    decision_owner = str(issue.get('DECISION', ''))
-                    if issue.get('OWNER'):
-                        decision_owner += f" (Owner: {issue['OWNER']})"
-                    sheet.cell(row=current_row, column=5, value=decision_owner)
+                    sheet.cell(row=current_row, column=1, value=str(issue.get('issue_description', issue.get('ISSUE', ''))))
+                    sheet.cell(row=current_row, column=2, value=str(issue.get('who_raised_it', issue.get('RAISED BY', ''))))
+                    sheet.cell(row=current_row, column=3, value=str(issue.get('root_cause', issue.get('ISSUE CAUSE', ''))))
+                    sheet.cell(row=current_row, column=4, value=str(issue.get('related_discussions', issue.get('RELATED DISCUSSIONS', ''))))
+                    sheet.cell(row=current_row, column=5, value=str(issue.get('notes', issue.get('NOTES', ''))))
                     
                     current_row += 1
                 except Exception as e:
                     print(f"Error processing Issue: {e}")
                     continue
         
+        # Add space before Todo Review
+        current_row += 1
+        
+        # Add Todo Review section with blue headers
+        if existing_todos:
+            # Todo Review header
+            review_header = sheet.cell(row=current_row, column=1, value="Todo Review")
+            review_header.font = Font(bold=True, color="FFFFFF")
+            review_header.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            review_header.alignment = Alignment(horizontal="left", vertical="center")
+            sheet.merge_cells(start_row=current_row, start_column=1, end_row=current_row, end_column=3)
+            current_row += 1
+            
+            # Todo Review section headers
+            review_headers = ['Who', 'Todo', 'Status', 'Notes']
+            for col, header in enumerate(review_headers, 1):
+                cell = sheet.cell(row=current_row, column=col, value=header)
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+                cell.alignment = Alignment(horizontal="left", vertical="center")
+            current_row += 1
+            
+            # Add existing todos for review
+            for todo in existing_todos:
+                try:
+                    if not isinstance(todo, dict):
+                        continue
+                    
+                    sheet.cell(row=current_row, column=1, value=str(todo.get('WHO', '')))
+                    sheet.cell(row=current_row, column=2, value=str(todo.get('TO-DO', '')))
+                    sheet.cell(row=current_row, column=3, value=str(todo.get('DONE?', 'In Progress')))
+                    sheet.cell(row=current_row, column=4, value=str(todo.get('NOTES', '')))
+                    
+                    current_row += 1
+                except Exception as e:
+                    print(f"Error processing existing TODO: {e}")
+                    continue
+        
         print(f"Added AI section with {current_row - start_row} total rows")
         return current_row
+    
+    def update_current_sheet_with_ai_data(self, meeting_data):
+        """Update the current sheet with AI-identified items instead of creating new sheet"""
+        print("=== L10 SHEET AUTOMATION (Update Current Sheet) ===")
+        
+        # Get the latest sheet to update
+        current_sheet = self.get_latest_sheet()
+        print(f"Updating sheet: {current_sheet.title}")
+        
+        # Find existing TO-DOs in the current sheet
+        existing_todos = self.find_existing_todos(current_sheet)
+        print(f"Found {len(existing_todos)} existing TO-DOs")
+        
+        # Get new TO-DOs from meeting data directly
+        new_todos_from_meeting = meeting_data.get('NEW TO-DOS', [])
+        
+        # FAILSAFE: Also check for alternative formats
+        if not new_todos_from_meeting and 'new_commitments' in meeting_data:
+            print("FAILSAFE: Converting new_commitments to NEW TO-DOS")
+            new_todos_from_meeting = []
+            for commitment in meeting_data['new_commitments']:
+                new_todos_from_meeting.append({
+                    'WHO': commitment.get('who', ''),
+                    'TO-DO': commitment.get('task', ''),
+                    'WHEN': commitment.get('due_date', 'Next meeting'),
+                    'CONTEXT': commitment.get('context', ''),
+                    'DEPENDENCIES': commitment.get('dependencies', 'None')
+                })
+        
+        # Filter out duplicates
+        truly_new_todos = []
+        for new_todo in new_todos_from_meeting:
+            is_duplicate = False
+            for existing in existing_todos:
+                if (new_todo.get('WHO', '').lower() == existing.get('WHO', '').lower() and
+                    new_todo.get('TO-DO', '').lower() in existing.get('TO-DO', '').lower()):
+                    is_duplicate = True
+                    break
+            if not is_duplicate:
+                truly_new_todos.append(new_todo)
+        
+        print(f"Found {len(truly_new_todos)} truly new TO-DOs")
+        
+        # Add AI section with new items
+        new_issues = meeting_data.get('ISSUES LIST (IDS)', [])
+        
+        # FAILSAFE: Also check for alternative formats
+        if not new_issues and 'issues_discussed' in meeting_data:
+            print("FAILSAFE: Converting issues_discussed to ISSUES LIST (IDS)")
+            new_issues = []
+            for issue in meeting_data['issues_discussed']:
+                new_issues.append({
+                    'issue_description': issue.get('issue', ''),
+                    'who_raised_it': issue.get('raised_by', ''),
+                    'root_cause': issue.get('context', ''),
+                    'related_discussions': ', '.join(issue.get('discussion_points', [])) if issue.get('discussion_points') else '',
+                    'notes': f"Decision: {issue.get('decision', '')} | Owner: {issue.get('owner', '')}"
+                })
+        
+        # ULTIMATE FAILSAFE: If still no data, create debug entry
+        if not truly_new_todos and not new_issues:
+            print("WARNING: No data found! Adding debug entry")
+            truly_new_todos = [{
+                'WHO': 'System',
+                'TO-DO': 'DEBUG: No meeting data was found - check Zapier payload structure',
+                'WHEN': 'Immediate',
+                'CONTEXT': f'Meeting data keys: {list(meeting_data.keys())}',
+                'DEPENDENCIES': 'Check /echo endpoint with same payload'
+            }]
+        
+        # Add AI section with proper formatting and include existing todos for review
+        self.add_ai_section(current_sheet, truly_new_todos, new_issues, existing_todos)
+        
+        # Save the workbook
+        self.wb.save(self.workbook_path)
+        print(f"Updated sheet: {current_sheet.title} with AI section")
+        
+        return {
+            'sheet_name': current_sheet.title,
+            'new_todos_count': len(truly_new_todos),
+            'new_issues_count': len(new_issues),
+            'existing_todos_count': len(existing_todos)
+        }
     
     def process_meeting_output(self, meeting_text):
         """Parse the meeting output text"""
@@ -351,7 +467,7 @@ class L10SheetAutomation:
                 'DEPENDENCIES': 'Check /echo endpoint with same payload'
             }]
         
-        self.add_ai_section(new_sheet, truly_new_todos, new_issues)
+        self.add_ai_section(new_sheet, truly_new_todos, new_issues, existing_todos)
         
         # Save the workbook
         self.wb.save(self.workbook_path)

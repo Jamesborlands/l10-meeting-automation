@@ -128,11 +128,8 @@ def process_l10():
         # Get sheet names before
         print(f"Sheets before: {automation.wb.sheetnames}")
         
-        # Process the meeting data
-        result = automation.create_next_l10_sheet_from_data(
-            meeting_data,
-            'weekly'
-        )
+        # Process the meeting data - update current sheet instead of creating new one
+        result = automation.update_current_sheet_with_ai_data(meeting_data)
         
         # CRITICAL: The automation saves to self.workbook_path which is the temp file
         # But we need to make sure it's actually saved
@@ -143,8 +140,8 @@ def process_l10():
         print(f"Sheets after save: {result}")
         print(f"File size: {os.path.getsize(working_file)} bytes")
         
-        # Generate filename with the new sheet name
-        output_filename = f"L10_Meeting_{result['new_sheet_name'].replace(' ', '_')}.xlsx"
+        # Generate filename with the updated sheet name
+        output_filename = f"L10_Meeting_{result['sheet_name'].replace(' ', '_')}_Updated.xlsx"
         
         # Return the updated file with the new sheet tab
         return send_file(
